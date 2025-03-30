@@ -111,8 +111,8 @@ class Rechnung:
         self.behandlungsfall: List["Behandlungsfall"] = []
         #todo ambulant oder stationär
     
-    def verify_rechnung(self) -> list[str]:
-        """ Verifies if the rechnung is valid acc.to our 2 main rules (Task1)
+    def get_violating_positions(self) -> list[str]:
+        """ Get each Rechnung behandlungsfall sitzung violating positions that violate our 2 main rules (Task1)
 
         - Bereung can only be billed once per sitzung
         - Multiple Bereungen on the same day require different specified times.

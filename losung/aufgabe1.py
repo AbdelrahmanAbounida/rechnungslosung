@@ -10,6 +10,10 @@ check wether the given rechnungen classes comply with 2 rules
 
 result :
 List of ids of the invoice positions that violate these rules 
+
+Approach:
+- add get_violating_positions method to the Rechnung class to check
+  Loop over all rechnung behandlungsfall'sitzungen'positions and each those 2 rules
 """
 # Patient has envoices (Rechnug) in which it descripes Behandlungsfall in which he can do multiple sitzungen (sessions) and each 
 # sitzung has multiple positionen / services and each position could have addons which infer addition costs (auslagen)
@@ -27,7 +31,7 @@ def task1():
 
   all_violatingpositions = []
   for rechnung in rechnungen:
-    all_violatingpositions.extend(rechnung.verify_rechnung())
+    all_violatingpositions.extend(rechnung.get_violating_positions())
 
   print(f"List of violationing positions: {all_violatingpositions}")
   return all_violatingpositions
