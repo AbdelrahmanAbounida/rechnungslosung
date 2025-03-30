@@ -21,7 +21,7 @@
 
 ### ⚠️ Warning
 
-Before running losung2, first you **must** create `.env` file using `.env.example` template
+Before running losung2, first you **must** create `.env` file using `.env.example` template and also add this file `files/45_Visite.txt`
 
 ### Setup
 

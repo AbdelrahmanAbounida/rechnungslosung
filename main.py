@@ -8,5 +8,5 @@ load_dotenv()
 
 
 if __name__ == '__main__':
-    task1()
+    task2()
     # task2() # Before running task2 make sure to add GOOGLE_GEMINI_APIKEY to your .env

@@ -16,11 +16,11 @@ and return a list of rules that can be verified
 - solution3: Simple Regex Check with NLTK/Spacy
 """
 from losung.utils import read_text_file, read_class_params_and_methods
-from rechnungen.rechnung import Rechnung
-from langchain_core.prompts import PromptTemplate
 from langchain_google_genai import GoogleGenerativeAI
-from loguru import logger
+from langchain_core.prompts import PromptTemplate
+from rechnungen.rechnung import Rechnung
 from typing import Literal
+from loguru import logger
 import sys
 import os 
 
