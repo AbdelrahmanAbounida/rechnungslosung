@@ -27,7 +27,7 @@ import os
 def task2():
     # 1- Read visite_45 file text
     logger.info("Reading visite_45")
-    text = read_text_file("assets/45_Visite.txt")
+    text = read_text_file("files/45_Visite.txt")
     if not text:
         logger.error("Error: Could not read the file. Please Check that assets/45_Visite.txt file exist ")
         return
@@ -46,72 +46,95 @@ def task2():
     if not rules:
         logger.error("No verifiable rules found")
     
-    logger.success(f"""
-                Found {len(rules)} verifiable rules: \n
-                    {",".join(rules)}
-                """)
+    logger.success(f"\n ✅ Found {len(rules)} verifiable rules:\n" + "\n".join([f"  - {rule}" for rule in rules]))
+
     return rules
 
 
 
 def prepare_llm_chain(llm_type: Literal["google"] = "google"):
     """
-    Prepare the optimized LLM chain for rule extraction with enhanced reliability
+    Prepare the LLM chain we are going to use to extract verifiable rules.
     """
-    google_api_key = os.environ.get("GOOGLE_GEMINI_APIKEY")
-    
+
+    google_api_key = os.environ.get("GOOGLE_GEMINI_APIKEY", "")
+
     if not google_api_key:
-        logger.error("Missing GOOGLE_GEMINI_APIKEY in environment")
+        logger.error("GOOGLE_GEMINI_APIKEY not found in your .env")
         sys.exit(1)
 
-    llm = GoogleGenerativeAI(
-        model="gemini-1.5-flash",
-        google_api_key=google_api_key,
-        temperature=0.2,  # Lower temperature for more deterministic output
-        max_output_tokens=1000
-    )
+    if llm_type == "google":
+        try:
+            llm = GoogleGenerativeAI(
+                model="gemini-1.5-flash", 
+                google_api_key=google_api_key, 
+                temperature=0.7
+            )
+        except Exception as e:
+            logger.error(f"Failed to initialize Google LLM: {str(e)}")
+            sys.exit(1)
+    else:
+        logger.error("Invalid LLM type. Only 'google' is supported for now.")
+        sys.exit(1)
 
-    template = """Act as a German legal extraction expert. Analyze the legal text and extract ONLY concrete, verifiable rules that can be validated against invoice parameters.
+    # This prompt could be improved and more dynamic
+    template = """
+        You are a legal German expert assistant tasked with extracting verifiable rules from the following legal text.
+        A rule is verifiable if it can be confirmed using invoice params and attributes (e.g., date, number of consultations).
+        Identify only the verifiable rules.
 
-Invoice Parameters Available:
-{invoice_params}
+        NOTES:
+        - Only extract rules that can be verified using invoice params and attributes.
+        - Your output should be a list of rules in a comma-separated format.
+        - Do not include anything other than the list of verifiable rules.
+        - Sample output format: 'rule1', 'rule2', 'rule3', ...
 
-Legal Text to Analyze:
-{legal_text}
+        ----------
+        Sample Invoice Params, data:
+        {invoice_params}
+        
+        ---------
+        Legal text:
+        {legal_text}
+        ---------
 
-Formatting Rules:
-- Return ONLY a comma-separated list
-- Each rule must be a complete statement
-- Use plain text without quotation marks
-- Maximum 10 rules
-- No explanatory text
-- Must reference concrete invoice parameters
+        Extracted List of Rules:
+    """
 
-Examples of Valid Responses:
-* Maximum 3 consultations per month,Consultation duration must not exceed 30 minutes,Invoice date must be within 30 days of service
-* Night surcharge applies after 20:00,Weekend surcharge applies Saturday-Sunday,Emergency fee requires prior authorization
-
-Extracted Rules:"""
-
-    prompt = PromptTemplate(
-        template=template,
-        input_variables=["invoice_params", "legal_text"]
-    )
+    # Initialize the PromptTemplate using the template
+    prompt = PromptTemplate.from_template(template)
     
+    # Chain the prompt with LLM
     chain = prompt | llm
     return chain
 
 def extract_rules_from_text(visite_text: str, class_description: str) -> list[str]:
     """
-    Robust rule extraction with validation
+    Extract a list of verifiable rules from the provided legal text according to the class description.
     """
-    chain = prepare_llm_chain()
-    response = chain.invoke({
+    
+    # Get the LLM chain
+    chain = prepare_llm_chain()  # Optionally, you can pass a custom llm_type here if needed
+    
+    # Prepare the input for the LLM
+    input_data = {
         "invoice_params": class_description,
         "legal_text": visite_text
-    })
-    
-    
-    # Robust output cleaning
-    clean_output = response.strip().replace("'", "").replace('"', '')
-    return [rule.strip() for rule in clean_output.split(",") if rule.strip()]
+    }
+
+    # Invoke the chain and extract the rules
+    try:
+        response = chain.invoke(input_data)
+    except Exception as e:
+        logger.error(f"Error invoking LLM chain: {str(e)}")
+        return []
+
+    # Ensure response is a comma-separated string
+    if isinstance(response, str):
+        # Parse the comma-separated list of rules
+        rules = [rule.strip() for rule in response.split(',') if rule.strip()]
+    else:
+        logger.error("Unexpected response format from LLM chain")
+        return []
+
+    return rules

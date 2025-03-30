@@ -1,5 +1,5 @@
 venv
 # lets add those description files for now 
-assets 
+files 
 .pdm-python
 .env
