@@ -2,7 +2,7 @@
 
 ### Folder Structure
 
-- assets: Task Description
-- losung: Main Solution implementation
-- rechnungen: envoices classes
-- main.py: to check the solution results
+    ├── assets                    # Task Description >> I will push it if suitable
+    ├── losung                    # Main Solution implementation
+    ├── rechnungen                # rechnugen Base classes
+    └── main.py                   # to check the solution results
