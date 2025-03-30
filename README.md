@@ -10,10 +10,18 @@
 ### Results
 
 - Task1
-  [losung1](./assets/task1.png)
+<p align="center" width="100%">
+  <img src="./assets/task1.png" alt="losung1" />
+</p>
 
 - Task2
-  [losung2](./assets/task2.png)
+<p align="center" width="100%">
+  <img src="./assets/task2.png" alt="losung2" />
+</p>
+
+### ⚠️ Warning
+
+Before running losung2, first you **must** create `.env` file using `.env.example` template
 
 ### Setup
 
